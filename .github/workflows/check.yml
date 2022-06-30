@@ -69,6 +69,10 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@v1.4.0
 
+      - name: Install contract node
+        run: | 
+          cargo install contracts-node --git https://github.com/webb-tools/substrate-contracts-node.git@develop --force --locked
+
       - name: Install `cargo-contract` `master`
         uses: actions-rs/cargo@v1
         with:
@@ -81,15 +85,15 @@ jobs:
             cargo -vV
             cargo contract --version
 
-      - name: Install webb-tools/substrate-contracts-node
-        uses: jaxxstorm/action-install-gh-release@v1.5.0
-        with: # Grab a specific tag with caching
-          repo: webb-tools/substrate-contracts-node
-          platform: linux
-          tag: linux_substrate_contracts_node.tar.gz
-          cache: enable
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Install webb-tools/substrate-contracts-node
+      #   uses: jaxxstorm/action-install-gh-release@v1.5.0
+      #   with: # Grab a specific tag with caching
+      #     repo: webb-tools/substrate-contracts-node
+      #     platform: linux
+      #     tag: linux_substrate_contracts_node.tar.gz
+      #     cache: enable
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Redspot
         run: yarn global add redspot
