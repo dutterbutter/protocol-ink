@@ -7,7 +7,7 @@ on:
     branches: [ main ]
     paths-ignore:
       - 'README.md'
-
+  
   workflow_dispatch:
 
 jobs:
@@ -85,6 +85,8 @@ jobs:
         uses: jaxxstorm/action-install-gh-release@v1.5.0
         with: # Grab a specific tag with caching
           repo: webb-tools/substrate-contracts-node
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           tag: v20
           cache: enable
 
