@@ -69,10 +69,6 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@v1.4.0
 
-      - name: Install contract node
-        run: | 
-          cargo install contracts-node --git https://github.com/webb-tools/substrate-contracts-node.git -b develop --force --locked
-
       - name: Install `cargo-contract` `master`
         uses: actions-rs/cargo@v1
         with:
@@ -84,6 +80,10 @@ jobs:
             wasm-opt --version
             cargo -vV
             cargo contract --version
+
+      - name: Install contract node from fork
+        run: | 
+          cargo install contracts-node --git https://github.com/webb-tools/substrate-contracts-node.git --force --locked
 
       # - name: Install webb-tools/substrate-contracts-node
       #   uses: jaxxstorm/action-install-gh-release@v1.5.0
