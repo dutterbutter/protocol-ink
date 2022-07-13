@@ -83,7 +83,6 @@ jobs:
         uses: jaxxstorm/action-install-gh-release@v1.5.0
         with: # Grab a specific tag
           repo: webb-tools/substrate-contracts-node
-          tag: 'tags/v25'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
