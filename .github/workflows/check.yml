@@ -80,11 +80,11 @@ jobs:
           cargo install contracts-node --git https://github.com/webb-tools/substrate-contracts-node.git --force --locked
 
       - name: Install webb-tools/substrate-contracts-node
-        uses: jaxxstorm/action-install-gh-release@v1.5.0
-        with: # Grab a specific tag
-          repo: webb-tools/substrate-contracts-node
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - id: fetch-latest-release
+        uses: thebritican/fetch-latest-release@v1
+        with:
+          repo_path: webb-tools/substrate-contracts-node
+          github_token: ${{ github.token }}
 
       - name: Install Redspot
         run: yarn global add redspot
