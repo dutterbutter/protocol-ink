@@ -83,7 +83,6 @@ jobs:
         uses: jaxxstorm/action-install-gh-release@v1.5.0
         with: # Grab a specific tag with caching
           repo: webb-tools/substrate-contracts-node
-          platform: linux
           tag: 'tags/v25'
           cache: enable
         env:
