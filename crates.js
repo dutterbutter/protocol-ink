@@ -1,0 +1,1 @@
+window.ALL_CRATES = ["governed_token_wrapper","mixer","mixer_verifier","poseidon","vanchor","vanchor_verifier"];
