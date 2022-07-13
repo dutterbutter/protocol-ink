@@ -79,7 +79,6 @@ jobs:
         run: | 
           cargo install contracts-node --git https://github.com/webb-tools/substrate-contracts-node.git --force --locked
 
-      - name: Install webb-tools/substrate-contracts-node
       - id: fetch-latest-release
         uses: thebritican/fetch-latest-release@v1
         with:
