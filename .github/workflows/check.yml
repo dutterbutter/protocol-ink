@@ -84,7 +84,6 @@ jobs:
         with: # Grab a specific tag with caching
           repo: webb-tools/substrate-contracts-node
           tag: 'tags/v25'
-          cache: enable
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
