@@ -30,7 +30,7 @@ jobs:
 
   # This job builds and runs tests for the contracts
   test:
-    runs-on: ubuntu-latest
+    runs-on: buildjet-64vcpu-ubuntu-2004
     steps:
 
       - uses: actions/setup-node@v3
