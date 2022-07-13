@@ -37,10 +37,20 @@ pub mod mixer {
     #[ink(event)]
     pub struct Deposit {
         #[ink(topic)]
-        from: Option<AccountId>,
+        from: AccountId,
         #[ink(topic)]
-        commitment: Option<[u8; 32]>,
+        commitment: [u8; 32],
         value: Balance,
+    }
+
+    #[ink(event)]
+    pub struct Withdraw {
+        #[ink(topic)]
+        recipient: AccountId,
+        #[ink(topic)]
+        relayer: AccountId,
+        fee: Balance,
+        refund: Balance,
     }
 
     /// The mixer error types.
@@ -115,9 +125,6 @@ pub mod mixer {
                 contract.merkle_tree.current_root_index = 0;
                 contract.merkle_tree.next_index = 0;
 
-                let message = ink_prelude::format!("Instantiating contract");
-                ink_env::debug_println!("{}", &message);
-
                 for i in 0..levels {
                     contract
                         .merkle_tree
@@ -151,7 +158,15 @@ pub mod mixer {
                 "Deposit size is not correct"
             );
 
-            self.merkle_tree.insert(self.poseidon.clone(), commitment)
+            let index = self.merkle_tree.insert(self.poseidon.clone(), commitment);
+
+            self.env().emit_event(Deposit {
+                from: self.env().caller(),
+                commitment,
+                value: self.env().transferred_value(),
+            });
+
+            index
         }
 
         #[ink(message, payable)]
@@ -231,9 +246,17 @@ pub mod mixer {
                     .transfer(withdraw_params.recipient, withdraw_params.refund)
                     .is_err()
                 {
+                    ink_env::debug_println!("refund processing failed");
                     panic!("{}", ERROR_MSG);
                 }
             }
+
+            self.env().emit_event(Withdraw {
+                recipient: withdraw_params.recipient,
+                relayer: withdraw_params.relayer,
+                fee: withdraw_params.fee,
+                refund: withdraw_params.refund,
+            });
 
             Ok(())
         }

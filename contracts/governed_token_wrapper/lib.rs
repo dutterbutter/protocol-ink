@@ -1,10 +1,19 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(min_specialization)]
 
+pub use self::governed_token_wrapper::{GovernedTokenWrapper, GovernedTokenWrapperRef};
+use ink_env::call::FromAccountId;
 use ink_lang as ink;
+use ink_storage::traits::SpreadAllocate;
+
+impl SpreadAllocate for GovernedTokenWrapperRef {
+    fn allocate_spread(_ptr: &mut ink_primitives::KeyPtr) -> Self {
+        FromAccountId::from_account_id([0; 32].into())
+    }
+}
 
 #[brush::contract]
-mod governed_token_wrapper {
+pub mod governed_token_wrapper {
     use brush::contracts::psp22::extensions::burnable::*;
     use brush::contracts::psp22::extensions::metadata::*;
     use brush::contracts::psp22::extensions::mintable::*;
@@ -112,9 +121,22 @@ mod governed_token_wrapper {
     #[ink(event)]
     pub struct Wrap {
         #[ink(topic)]
-        sender: Option<AccountId>,
+        token_address: AccountId,
         #[ink(topic)]
-        mint_for: Option<AccountId>,
+        sender: AccountId,
+        #[ink(topic)]
+        mint_for: AccountId,
+        amount: Balance,
+    }
+
+    #[ink(event)]
+    pub struct Unwrap {
+        #[ink(topic)]
+        token_address: AccountId,
+        #[ink(topic)]
+        sender: AccountId,
+        #[ink(topic)]
+        burn_for: AccountId,
         amount: Balance,
     }
 
@@ -184,6 +206,13 @@ mod governed_token_wrapper {
                 leftover,
             )?;
 
+            self.env().emit_event(Wrap {
+                token_address: token_address.clone(),
+                sender: self.env().caller(),
+                mint_for: self.env().caller(),
+                amount,
+            });
+
             Ok(())
         }
 
@@ -202,6 +231,13 @@ mod governed_token_wrapper {
                 self.env().caller(),
                 amount,
             )?;
+
+            self.env().emit_event(Unwrap {
+                token_address,
+                sender: self.env().caller(),
+                burn_for: self.env().caller(),
+                amount,
+            });
 
             Ok(())
         }
@@ -226,6 +262,13 @@ mod governed_token_wrapper {
                 self.env().caller(),
                 amount,
             )?;
+
+            self.env().emit_event(Unwrap {
+                token_address,
+                sender: recipient,
+                burn_for: self.env().caller(),
+                amount,
+            });
 
             Ok(())
         }
@@ -259,8 +302,9 @@ mod governed_token_wrapper {
             )?;
 
             self.env().emit_event(Wrap {
-                sender: Some(sender),
-                mint_for: Some(sender),
+                token_address,
+                sender,
+                mint_for: sender,
                 amount,
             });
 
@@ -298,6 +342,13 @@ mod governed_token_wrapper {
                 leftover,
             )?;
 
+            self.env().emit_event(Wrap {
+                token_address,
+                sender: sender,
+                mint_for: recipient,
+                amount,
+            });
+
             Ok(())
         }
 
@@ -316,6 +367,13 @@ mod governed_token_wrapper {
         ) -> Result<()> {
             self.is_valid_unwrapping(token_address, amount)?;
             self.do_unwrap(token_address.clone(), sender, sender, amount)?;
+
+            self.env().emit_event(Unwrap {
+                token_address,
+                sender,
+                burn_for: sender,
+                amount,
+            });
 
             Ok(())
         }
@@ -629,10 +687,23 @@ mod governed_token_wrapper {
         /// Calculates the fee to be sent to fee recipient
         ///
         /// * `amount_to_wrap` - The amount to wrap
-        fn get_fee_from_amount(&mut self, amount_to_wrap: Balance) -> Balance {
+        #[ink(message)]
+        pub fn get_fee_from_amount(&mut self, amount_to_wrap: Balance) -> Balance {
             amount_to_wrap
                 .saturating_mul(self.fee_percentage)
                 .saturating_div(100)
+        }
+
+        /// Calculates the amount to be wrapped
+        ///
+        /// * `amount_to_wrap` - The amount to wrap
+        #[ink(message)]
+        pub fn get_amount_to_wrap(&mut self, deposit: Balance) -> Result<Balance> {
+            let amount_to_wrap = deposit
+                .saturating_mul(100)
+                .saturating_div(100 - self.fee_percentage);
+
+            Ok(amount_to_wrap)
         }
 
         /// Determine if an account id/address is a governor
@@ -693,7 +764,7 @@ mod governed_token_wrapper {
         /// * `token_address` - The address to check
         #[ink(message)]
         pub fn is_valid_token_address(&self, token_address: AccountId) -> bool {
-            self.valid.get(token_address).unwrap()
+            self.valid.get(token_address).unwrap_or(false)
         }
 
         /// Returns total psp22 token supply

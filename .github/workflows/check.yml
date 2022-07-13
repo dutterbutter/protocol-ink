@@ -54,12 +54,6 @@ jobs:
           components: rust-src
           override: true
 
-      # - name: Install cargo-dylint
-      #   uses: baptiste0928/cargo-install@v1
-      #   with:
-      #     crate: cargo-dylint
-      #     version: 2
-
       - name: Install dylint-link
         uses: baptiste0928/cargo-install@v1
         with:
@@ -85,15 +79,15 @@ jobs:
         run: | 
           cargo install contracts-node --git https://github.com/webb-tools/substrate-contracts-node.git --force --locked
 
-      # - name: Install webb-tools/substrate-contracts-node
-      #   uses: jaxxstorm/action-install-gh-release@v1.5.0
-      #   with: # Grab a specific tag with caching
-      #     repo: webb-tools/substrate-contracts-node
-      #     platform: linux
-      #     tag: linux_substrate_contracts_node.tar.gz
-      #     cache: enable
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install webb-tools/substrate-contracts-node
+        uses: jaxxstorm/action-install-gh-release@v1.5.0
+        with: # Grab a specific tag with caching
+          repo: webb-tools/substrate-contracts-node
+          platform: linux
+          tag: 'tags/v25'
+          cache: enable
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Redspot
         run: yarn global add redspot
