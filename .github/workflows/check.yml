@@ -75,10 +75,6 @@ jobs:
             cargo -vV
             cargo contract --version
 
-      - name: Install contract node from fork
-        run: | 
-          cargo install contracts-node --git https://github.com/webb-tools/substrate-contracts-node.git --force --locked
-
       - id: fetch-latest-release
         uses: gregziegan/fetch-latest-release@v2.0.0
         with:
